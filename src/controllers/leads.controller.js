@@ -1,12 +1,22 @@
+//importing modules
 const fs = require('fs');
 const csv = require('csv-parser');
 
-let leads = []; // in-memory storage
+let leads = []; // in-memory leads storage
 
-function uploadLeadsController(req, res) {
+// upload leads via csv
+function uploadLeads(req, res) {
   try {
-    if (!req.file) return res.status(400).json({ message: "CSV file is required" });
+    
+    //file not uploaded
+    if (!req.file)
+       return res.status(400).json({ message: "CSV file is required" });
 
+    //validate file type
+    if (req.file.mimetype !== 'text/csv')
+       return res.status(400).json({ message: "Invalid file format" });
+    
+    //parse csv and store leads
     leads = [];
     fs.createReadStream(req.file.path)
       .pipe(csv())
@@ -21,11 +31,12 @@ function uploadLeadsController(req, res) {
   }
 }
 
+// get all leads
 function getLeads() {
   return leads;
 }
 
 module.exports = {
-  uploadLeadsController,
+  uploadLeads,
   getLeads,
 };
