@@ -7,7 +7,6 @@ const leadSchema = new mongoose.Schema({
   industry: { type: String },
   location: { type: String },
   linkedin_bio: { type: String },
-  offer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer', required: true },
   created_at: { type: Date, default: Date.now },
 });
 

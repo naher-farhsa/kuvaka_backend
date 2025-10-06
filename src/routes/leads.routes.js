@@ -15,5 +15,9 @@ const upload = multer({storage:multer.memoryStorage()});
 
 //post route mapping - upload leads via csv
 router.post('/upload', upload.single('file'), leadsController.uploadLeads);
+//delete route mapping - delete all leads
+router.delete('/delete', leadsController.deleteAllLeads);
+//get route mapping - get all leads
+router.get('/get', leadsController.getLeads);
 
 module.exports = router;

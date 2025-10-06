@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const scoreSchema = new mongoose.Schema({
   lead: { type: mongoose.Schema.Types.ObjectId, ref: 'Lead', required: true },
+  offer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer', required: true },
   rule_score: { type: Number, default: 0 },
   ai_intent: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
   ai_reasoning: { type: String },

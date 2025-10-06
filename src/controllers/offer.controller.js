@@ -27,13 +27,13 @@ async function createOffer(req, res) {
     return res.status(500).json({ message: "Failed to create offer" });
   }
 }
-// delete all offers
-async function deleteAllOffers(req,res){
+// delete all offer
+async function deleteAllOffer(req,res){
   try{
     await offerModel.deleteMany({});
     return res.status(200).json({message:"All offers deleted"});
   }catch(err){
-    console.error(errr);
+    console.error(err);
     return res.status(500).json({message:"Failed to delete offers"});
   }
 }
@@ -44,5 +44,6 @@ async function getOffer() {
 
 module.exports = {
   createOffer,
+  deleteAllOffer,
   getOffer,
 };
