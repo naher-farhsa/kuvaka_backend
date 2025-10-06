@@ -34,31 +34,37 @@ function calculateScore(lead, offer) {
 
   // industry match (+20, +10, +0)
   const leadIndustry = lead.industry?.toLowerCase() || "";
-  const offerUseCase = offer.ideal_use_cases?.toLowerCase() || "";
+  const offerUseCases = offer.ideal_use_cases || [];
 
-  if (leadIndustry && offerUseCase) {
-    if (offerUseCase.includes(leadIndustry)) {
-      score += 20;
-      reasoning.push("Exact ICP industry match (+20)"); // industry - exact match
-    } else if (
-      leadIndustry.includes("tech") &&
-      offerUseCase.includes("software")
-    ) {
-      score += 10;
-      reasoning.push("Adjacent industry match (+10)"); // industry - adjacent match
-    } else {
-      reasoning.push("Non-ideal industry (+0)"); // industry - no match
-    }
+if (leadIndustry && offerUseCases.length > 0) {
+  // exact match if any use case includes the industry
+  const exactMatch = offerUseCases.some((uc) =>
+    uc.toLowerCase().includes(leadIndustry)
+  );
+
+  if (exactMatch) {
+    score += 20;
+    reasoning.push("Exact ICP industry match (+20)"); // exact match
+  } else if (
+    leadIndustry.includes("tech") &&
+    offerUseCases.some((uc) => uc.toLowerCase().includes("software"))
+  ) {
+    score += 10;
+    reasoning.push("Adjacent industry match (+10)"); // adjacent match
+  } else {
+    reasoning.push("Non-ideal industry (+0)"); // no match
   }
+}
+
 
   // data completeness (+10, +0)
   const requiredFields = ["name", "email", "company", "role", "industry"];
   const hasAllFields = requiredFields.every((f) => lead[f]);
   if (hasAllFields) {
     score += 10;
-    reasoning.push("Complete data (+10)"); // data - complete
+    reasoning.push("Complete data (+10)"); // complete data
   } else {
-    reasoning.push("Missing key info (+0)"); // data - incomplete
+    reasoning.push("Missing key info (+0)"); // incomplete data
   }
 
   return {

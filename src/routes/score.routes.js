@@ -5,10 +5,10 @@ const express = require('express');
 const router = express.Router();
 
 //importing score controller
-const scoreController = require('../controllers/scoreController');
+const scoreController = require('../controllers/score.controller');
 
 //post route mapping - run scoring algorithm
-router.post('/score', scoreController.runScoring);
+router.post('/run', scoreController.runScoring);
 
 //post route mapping - get scoring results
 router.get('/results', scoreController.getResults);

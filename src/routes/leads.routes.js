@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 //importing leads controller
-const leadsController = require('../controllers/leadsController');
+const leadsController = require('../controllers/leads.controller');
 
 //importing multer for csv file uploads
 const multer = require('multer');

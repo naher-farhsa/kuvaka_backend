@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 //importing offer controller 
-const offerController = require('../controllers/offerController');
+const offerController = require('../controllers/offer.controller')
 
 //post route mapping - create offer
 router.post('/', offerController.createOffer);

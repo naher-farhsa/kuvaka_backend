@@ -1,7 +1,8 @@
-const offers = []; // in-memory offer storage
+//importing offer model
+const offerModel=require('../models/offer.model')
 
 // create a new offer
-function createOffer(req, res) {
+async function createOffer(req, res) {
   try {
     const { name, value_props, ideal_use_cases } = req.body;
 
@@ -11,14 +12,13 @@ function createOffer(req, res) {
     }
 
     // offer must be unique by name
-    const existingOffer = offers.find(o => o.name === name);
-    if (existingOffer) {
+    const existing = await offerModel.findOne({ name });
+    if (existing) {
       return res.status(400).json({ message: "Offer already exists" });
     }
     
-    // save offer
-    const offer = { name, value_props, ideal_use_cases };
-    offers.push(offer);
+    // save offer to db
+    const offer = await offerModel.create({ name, value_props, ideal_use_cases });
 
     return res.status(201).json({ message: "Offer saved", offer });
 
@@ -27,9 +27,19 @@ function createOffer(req, res) {
     return res.status(500).json({ message: "Failed to create offer" });
   }
 }
+// delete all offers
+async function deleteAllOffers(req,res){
+  try{
+    await offerModel.deleteMany({});
+    return res.status(200).json({message:"All offers deleted"});
+  }catch(err){
+    console.error(errr);
+    return res.status(500).json({message:"Failed to delete offers"});
+  }
+}
 // get latest offer
-function getOffer() {
-  return offers[offers.length - 1] || null; 
+async function getOffer() {
+  return await offerModel.findOne().sort({ created_at: -1 }); 
 }
 
 module.exports = {
