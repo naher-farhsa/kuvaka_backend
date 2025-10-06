@@ -17,15 +17,27 @@ function calculateScore(lead, offer) {
     role.includes("ceo") ||
     role.includes("cto") ||
     role.includes("cmo") ||
+    role.includes("cfo") ||
+    role.includes("coo") ||
     role.includes("founder") ||
     role.includes("co-founder") ||
+    role.includes("president") ||
     role.includes("head") ||
     role.includes("director") ||
     role.includes("vp")
   ) {
     score += 20;
     reasoning.push("Decision maker role (+20)"); // role - decision maker
-  } else if (role.includes("manager") || role.includes("lead")) {
+  } else if (
+    role.includes("manager") || 
+    role.includes("lead") || 
+    role.includes("principal") || 
+    role.includes("architect")|| 
+    role.includes("specialist") ||
+    role.includes("consultant") ||
+    role.includes("engineer") ||
+    role.includes("analyst") 
+  ) {
     score += 10;
     reasoning.push("Influencer role (+10)"); // role - influencer
   } else {

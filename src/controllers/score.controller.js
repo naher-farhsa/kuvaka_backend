@@ -55,7 +55,7 @@ async function runScoring(req, res) {
 // get scoring results
 async function getResults(req, res) {
   try {
-    const { offer_id } = req.query;
+    const { offer_id } = req.body;
     if (!offer_id) return res.status(400).json({ message: "offer_id is required" });
 
     const scores = await scoreModel
