@@ -19,8 +19,8 @@ A **B2B lead scoring backend service** that combines **AI-based scoring** (Googl
 1. **Clone the repository**
 
 ```bash
-git clone <your-repo-url>
-cd <repo-folder>
+git clone https://github.com/naher-farhsa/kuvaka_backend.git
+cd kuvakabackend
 ```
 
 2. **Install dependencies**
@@ -34,38 +34,38 @@ npm install
 Create a `.env` file in the root directory:
 
 ```env
-PORT=3010
-MONGODB_URI=<your-mongo-connection-string>
-GEMINI_API_KEY=<your-google-genai-key>
+PORT=<server-port>
+MONGODB_URI=<mongo-connection-string>
+GEMINI_API_KEY=<google-genai-key>
 ```
 
 4. **Start the server locally**
 
 ```bash
+npm install
 npm run start
 ```
 
-Your API will run on `http://localhost:3010`.
+Your API will run on `http://localhost:PORT`.
 
 ---
 
-## Render Deployment
 
-Your API is deployed at:
+API is deployed at Render:
 
+Base URL: 
 ```
 https://b2b-lead-classifier.onrender.com
 ```
-
 ---
 
 ## Live API Endpoints
 
 | Purpose | Method | URL |
 | ------- | ------ | --- |
-| Get latest offer | GET | [https://b2b-lead-classifier.onrender.com/api/offer/latest](https://b2b-lead-classifier.onrender.com/api/offer/latest) |
+| Get latest offer    | GET | [https://b2b-lead-classifier.onrender.com/api/offer/latest](https://b2b-lead-classifier.onrender.com/api/offer/latest) |
 | Get all leads | GET | [https://b2b-lead-classifier.onrender.com/api/leads/get](https://b2b-lead-classifier.onrender.com/api/leads/get) |
-| Get score results | GET (query param `offer_id`) | [https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab](https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab) |
+| Get score results | GET (query param `offer_id=68e4dddd2deede059871f4ab`) | [https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab](https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab) |
 
 > For score results, you must provide `offer_id` as a query parameter when accessing via browser.
 
@@ -238,12 +238,12 @@ https://b2b-lead-classifier.onrender.com
 ```json
 [
   {
-    "name": "Jackson Adams",
-    "role": "COO",
-    "company": "FlowWorks",
+    "name": "Liam Smith",
+    "role": "CEO",
+    "company": "TechNova",
     "intent": "High",
     "score": 80,
-    "reasoning": "COO is a decision maker role, increasing the likelihood of high intent, and aligns with B2B SaaS."
+    "reasoning": " CEO  role has highly relevance and industry is an exact match (B2B SaaS)."
   },
   {
     "name": "Scarlett Baker",
@@ -264,14 +264,52 @@ https://b2b-lead-classifier.onrender.com
 
 - AI receives lead details and offer context.
 - Task: classify each lead's buying intent (`High`, `Medium`, `Low`) and provide reasoning in 1–2 lines.
-- Expected JSON output from AI:
+- Expected JSON output from AI (after Batch Process):
 
+ **NOTE:**  The lead scoring runs in **batch mode** to prevent **HTTP 429 (rate limit)** errors from the Gemini model.   
+  **Batch Config:**
+ - `BATCH_SIZE = 5` → 5 leads per request  
+ - `RETRY_LIMIT = 3` → up to 3 retries  
+ - `RETRY_DELAY_MS = 15000` → 15s delay between retries   
+
+ Ensures stable AI interaction and smooth processing during high-volume scoring.
+ 
 ```json
-[
+//Batched Results
+[  
+   {
+    '$__': InternalCache { activePaths: [ctor], skipId: true },
+    '$isNew': false,
+    _doc: {
+      _id: new ObjectId('68e4fcfc6b9c7443369324c8'),
+      name: 'Liam Smith',
+      role: 'CEO',
+      company: 'TechNova',
+      industry: 'B2B SaaS',
+      location: 'New York',
+      linkedin_bio: 'Passionate about AI-driven SaaS products',
+      created_at: 2025-10-07T11:43:56.280Z,
+      __v: 0
+    },
+    ai_intent: 'High',
+    ai_reason: 'Role is highly relevant as CEO and the industry is an exact match (B2B SaaS).'
+  },
   {
-    "name": "Lead Name",
-    "ai_intent": "High",
-    "ai_reason": "Reason why the lead is high potential"
+    '$__': InternalCache { activePaths: [ctor], skipId: true },
+    '$isNew': false,
+    _doc: {
+      _id: new ObjectId('68e4fcfc6b9c7443369324c7'),
+      name: 'Ava Patel',
+      role: 'Head of Growth',
+      company: 'FlowMetrics',
+      industry: 'B2B SaaS',
+      location: 'San Francisco',
+      linkedin_bio: 'Experienced in scaling B2B SaaS operations',
+      created_at: 2025-10-07T11:43:56.278Z,
+      __v: 0
+    },
+    ai_intent: 'High',
+    ai_reason: 'Role is highly relevant as Head of Growth and the industry is an exact match (B2B SaaS).'
   }
 ]
 ```
