@@ -1,4 +1,4 @@
-# B2B Lead Scoring API
+# B2B Lead Classifier
 
 A **B2B lead scoring backend service** that combines **AI-based scoring** (Google Gemini 2.0 Flash) and **rule-based logic** to generate a final lead intent and score.
 
@@ -49,6 +49,28 @@ Your API will run on `http://localhost:3010`.
 
 ---
 
+## Render Deployment
+
+Your API is deployed at:
+
+```
+https://b2b-lead-classifier.onrender.com
+```
+
+---
+
+## Live API Endpoints
+
+| Purpose | Method | URL |
+| ------- | ------ | --- |
+| Get latest offer | GET | [https://b2b-lead-classifier.onrender.com/api/offer/latest](https://b2b-lead-classifier.onrender.com/api/offer/latest) |
+| Get all leads | GET | [https://b2b-lead-classifier.onrender.com/api/leads/get](https://b2b-lead-classifier.onrender.com/api/leads/get) |
+| Get score results | GET (query param `offer_id`) | [https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab](https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab) |
+
+> For score results, you must provide `offer_id` as a query parameter when accessing via browser.
+
+---
+
 ## API Endpoints & Postman Examples
 
 ### 1. Create an Offer
@@ -86,7 +108,7 @@ Your API will run on `http://localhost:3010`.
 
 **DELETE** `/api/offer/delete`
 
-**Response Body (JSON)**:
+**Response**:
 
 ```json
 {
@@ -98,9 +120,11 @@ Your API will run on `http://localhost:3010`.
 
 ### 3. Get Latest Offer
 
-**GET** `/api/latest`
+**GET** `/api/offer/latest`  
 
-**Response Body (JSON)**:
+**Live Render URL**: [https://b2b-lead-classifier.onrender.com/api/offer/latest](https://b2b-lead-classifier.onrender.com/api/offer/latest)
+
+**Response**:
 
 ```json
 {
@@ -116,7 +140,7 @@ Your API will run on `http://localhost:3010`.
 
 ### 4. Upload Leads CSV
 
-**POST** `/api/leads/upload`
+**POST** `/api/leads/upload`  
 
 **Form Data**:
 
@@ -136,9 +160,11 @@ Your API will run on `http://localhost:3010`.
 
 ### 5. Get All Leads
 
-**GET** `/api/leads/get`
+**GET** `/api/leads/get`  
 
-**Example Response – If leads exist**:
+**Live Render URL**: [https://b2b-lead-classifier.onrender.com/api/leads/get](https://b2b-lead-classifier.onrender.com/api/leads/get)
+
+**Example Response**:
 
 ```json
 [
@@ -163,33 +189,17 @@ Your API will run on `http://localhost:3010`.
 ]
 ```
 
-**Example Response – If no leads exist**:
-
-```json
-{
-  "message": "No leads found"
-}
-```
-
 ---
 
 ### 6. Delete All Leads
 
 **DELETE** `/api/leads/delete`
 
-**Response – Success**:
+**Response**:
 
 ```json
 {
   "message": "All leads deleted"
-}
-```
-
-**Response – Failure**:
-
-```json
-{
-  "message": "Failed to delete leads"
 }
 ```
 
@@ -219,15 +229,9 @@ Your API will run on `http://localhost:3010`.
 
 ### 8. Get Score Results
 
-**POST** `/api/score/results`
+**GET** `/api/score/results?offer_id=<offer_id>`  
 
-**Request Body (JSON)**:
-
-```json
-{
-  "offer_id": "68e4dddd2deede059871f4ab"
-}
-```
+**Live Render URL Example**: [https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab](https://b2b-lead-classifier.onrender.com/api/score/results?offer_id=68e4dddd2deede059871f4ab)
 
 **Response**:
 
@@ -248,14 +252,6 @@ Your API will run on `http://localhost:3010`.
     "intent": "Low",
     "score": 30,
     "reasoning": "Lead Developer role has low relevance and industry is only adjacent (Software)."
-  },
-  {
-    "name": "Zoey Evans",
-    "role": "Product Owner",
-    "company": "NextLevel AI",
-    "intent": "Low",
-    "score": 20,
-    "reasoning": "Product Owner role has low relevance, although the company is in an adjacent industry (AI)."
   }
 ]
 ```
@@ -266,9 +262,9 @@ Your API will run on `http://localhost:3010`.
 
 **AI Prompt Logic**:
 
-* AI receives lead details and offer context.
-* Task: classify each lead's buying intent (`High`, `Medium`, `Low`) and provide reasoning in 1–2 lines.
-* Expected JSON output from AI:
+- AI receives lead details and offer context.
+- Task: classify each lead's buying intent (`High`, `Medium`, `Low`) and provide reasoning in 1–2 lines.
+- Expected JSON output from AI:
 
 ```json
 [
@@ -282,77 +278,14 @@ Your API will run on `http://localhost:3010`.
 
 **Rule-based Scoring**:
 
-* Points assigned based on lead attributes:
-
-  * Decision-maker role → +20 points
-  * Industry exact match → +20 points
-  * Adjacent industry → +10 points
-* **Final Score** = AI points + Rule points
-* **Intent Classification**:
-
-  * `High` → score ≥ 70
-  * `Medium` → 40 ≤ score < 70
-  * `Low` → score < 40
-* Reasoning always comes from AI output.
-
----
-
-## Scoring Reference Table
-
-| AI Intent | Rule Points | Final Score | Final Intent |
-| --------- | ----------- | ----------- | ------------ |
-| High      | 20–30       | 70+         | High         |
-| Medium    | 10–20       | 40–69       | Medium       |
-| Low       | 0–10        | <40         | Low          |
-
----
-
-## Deploy on Render
-
-1. Create a new **Web Service** on [Render](https://render.com/).
-2. Connect your GitHub repository.
-3. Add environment variables in Render:
-
-   * `PORT` (default `3010`)
-   * `MONGODB_URI`
-   * `GEMINI_API_KEY`
-4. Deploy the service. Render will provide a live URL like:
-
-```
-https://<your-app-name>.onrender.com
-```
-
-5. Test API endpoints using Postman or cURL.
-
----
-
-## Live API Base URL
-
-```
-https://<your-app-name>.onrender.com
-```
-
-**Endpoints**:
-
-```
-POST    /api/offer
-DELETE  /api/offer/delete
-GET     /api/latest
-POST    /api/leads/upload
-GET     /api/leads/get
-DELETE  /api/leads/delete
-POST    /api/score/run
-POST    /api/score/results
-```
-
----
-
-## Notes
-
-* Ensure the **Google Gemini API key** is valid.
-* Duplicate AI responses are filtered automatically.
-* Only AI reasoning (`ai_reason`) is used in final records.
-* Final score combines AI points and rule-based points.
+- Decision-maker role → +20 points
+- Industry exact match → +20 points
+- Adjacent industry → +10 points
+- **Final Score** = AI points + Rule points
+- **Intent Classification**:
+  - `High` → score ≥ 70
+  - `Medium` → 40 ≤ score < 70
+  - `Low` → score < 40
 
 ---
 
