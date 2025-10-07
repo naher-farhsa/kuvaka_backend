@@ -35,21 +35,27 @@ async function uploadLeads(req, res) {
   }
 }
 
-//delete all leads
-async function deleteAllLeads(req,res){
-  try{
-    await leadModel.deleteMany({});   
-    return res.status(200).json({message:"All leads deleted"});
-  }catch(err){
+// delete all leads
+async function deleteAllLeads(req, res) {
+  try {
+    await leadModel.deleteMany({});
+    return res.status(200).json({ message: "All leads deleted" });
+  } catch (err) {
     console.error(err);
-    return res.status(500).json({message:"Failed to delete leads"});
-  } 
-}
-// get all leads
-async function getLeads() {
-  return await leadModel.find().sort({ created_at: -1 });
+    return res.status(500).json({ message: "Failed to delete leads" });
+  }
 }
 
+// get all leads
+async function getLeads(req, res) {
+  try {
+    const leads = await leadModel.find();
+    return res.status(200).json(leads);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to fetch leads" });
+  }
+}
 module.exports = {
   uploadLeads,
   deleteAllLeads,

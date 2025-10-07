@@ -8,7 +8,7 @@ const scoreModel = require("../models/score.model");
 // run scoring for an offer
 async function runScoring(req, res) {
   try {
-    const { offer_id } = req.body;
+    const offer_id  = req.query.offer_id;
     if (!offer_id)
       return res.status(400).json({ message: "offer_id is required" });
 
@@ -86,7 +86,7 @@ async function runScoring(req, res) {
 // get scores for an offer
 async function getResults(req, res) {
   try {
-    const { offer_id } = req.body;
+    const offer_id = req.query.offer_id; 
     if (!offer_id)
       return res.status(400).json({ message: "offer_id is required" });
 

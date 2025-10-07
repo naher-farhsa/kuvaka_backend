@@ -27,23 +27,34 @@ async function createOffer(req, res) {
     return res.status(500).json({ message: "Failed to create offer" });
   }
 }
-// delete all offer
-async function deleteAllOffer(req,res){
-  try{
+
+// delete all offers
+async function deleteAllOffer(req, res) {
+  try {
     await offerModel.deleteMany({});
-    return res.status(200).json({message:"All offers deleted"});
-  }catch(err){
+    return res.status(200).json({ message: "All offers deleted" });
+  } catch (err) {
     console.error(err);
-    return res.status(500).json({message:"Failed to delete offers"});
+    return res.status(500).json({ message: "Failed to delete offers" });
   }
 }
+
 // get latest offer
-async function getOffer() {
-  return await offerModel.findOne().sort({ created_at: -1 }); 
+async function getOffer(req, res) {
+  try {
+    const latestOffer = await offerModel.findOne().sort({ created_at: -1 });
+    if (!latestOffer) {
+      return res.status(404).json({ message: "No offers found" });
+    }
+    return res.status(200).json(latestOffer);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to fetch latest offer" });
+  }
 }
 
 module.exports = {
-  createOffer,
+  createOffer,     // assuming you already have this
   deleteAllOffer,
   getOffer,
 };

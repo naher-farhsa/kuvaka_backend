@@ -19,5 +19,4 @@ router.post('/upload', upload.single('file'), leadsController.uploadLeads);
 router.delete('/delete', leadsController.deleteAllLeads);
 //get route mapping - get all leads
 router.get('/get', leadsController.getLeads);
-
 module.exports = router;
