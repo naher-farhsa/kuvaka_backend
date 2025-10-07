@@ -273,9 +273,11 @@ https://b2b-lead-classifier.onrender.com
  - `RETRY_DELAY_MS = 15000` → 15s delay between retries   
 
  Ensures stable AI interaction and smooth processing during high-volume scoring.
- 
-```json
-//Batched Results
+
+ **Response**: 
+- (Batched Results)
+```js
+
 [  
    {
     '$__': InternalCache { activePaths: [ctor], skipId: true },
@@ -320,13 +322,29 @@ https://b2b-lead-classifier.onrender.com
 - Industry exact match → +20 points
 - Adjacent industry → +10 points
 - **Final Score** = AI points + Rule points
-- **Intent Classification**:
-  - `High` → score ≥ 70
-  - `Medium` → 40 ≤ score < 70
-  - `Low` → score < 40
+### Final Score and Reasoning
+
+The final score for each lead is calculated by combining **AI points** and **rule-based points**:
+
+- **AI Points**:  
+  - `High` → 50 points  
+  - `Medium` → 30 points  
+  - `Low` → 10 points  
+
+- **Rule-based Points**: Calculated using the ruleScorer based on lead role, industry match, and other criteria.  
+
+- **Final Score** = AI Points + Rule-based Points  
+
+- **AI Reasoning**: Stored separately to explain why the AI assigned a particular intent.
 
 ---
 
-## License
+### Intent Classification
 
-MIT License
+Based on the **combined final score**, the lead’s buying intent is classified as:
+
+- `High` → score ≥ 70  
+- `Medium` → 40 ≤ score < 70  
+- `Low` → score < 40  
+
+This ensures that both AI analysis and business rules contribute to the final classification.
