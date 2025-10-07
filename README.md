@@ -86,7 +86,13 @@ Your API will run on `http://localhost:3010`.
 
 **DELETE** `/api/offer/delete`
 
-> Example Postman: select DELETE method and hit the endpoint. Response will confirm deletion.
+**Response Body (JSON)**:
+
+```json
+{
+  "message": "All offers deleted"
+}
+```
 
 ---
 
@@ -94,7 +100,17 @@ Your API will run on `http://localhost:3010`.
 
 **GET** `/api/latest`
 
-> Example Postman: select GET method and hit the endpoint. Response will return the most recently created offer.
+**Response Body (JSON)**:
+
+```json
+{
+  "_id": "68e4dddd2deede059871f4ab",
+  "name": "B2B AI Sales Accelerator",
+  "value_props": ["Automated lead scoring", "Predictive outreach", "Boost meeting conversion"],
+  "ideal_use_cases": ["B2B SaaS", "Enterprise SaaS", "Marketing Tech"],
+  "created_at": "2025-10-07T09:31:09.239Z"
+}
+```
 
 ---
 
@@ -118,7 +134,68 @@ Your API will run on `http://localhost:3010`.
 
 ---
 
-### 5. Run Lead Scoring
+### 5. Get All Leads
+
+**GET** `/api/leads/get`
+
+**Example Response – If leads exist**:
+
+```json
+[
+  {
+    "_id": "6501a1b2c3d4e5f678901234",
+    "name": "Jackson Adams",
+    "role": "COO",
+    "company": "FlowWorks",
+    "email": "jackson.adams@flowworks.com",
+    "phone": "+1234567890",
+    "created_at": "2025-10-07T09:31:09.239Z"
+  },
+  {
+    "_id": "6501a1b2c3d4e5f678901235",
+    "name": "Scarlett Baker",
+    "role": "Lead Developer",
+    "company": "SmartOps",
+    "email": "scarlett.baker@smartops.com",
+    "phone": "+1987654321",
+    "created_at": "2025-10-07T09:32:10.123Z"
+  }
+]
+```
+
+**Example Response – If no leads exist**:
+
+```json
+{
+  "message": "No leads found"
+}
+```
+
+---
+
+### 6. Delete All Leads
+
+**DELETE** `/api/leads/delete`
+
+**Response – Success**:
+
+```json
+{
+  "message": "All leads deleted"
+}
+```
+
+**Response – Failure**:
+
+```json
+{
+  "message": "Failed to delete leads"
+}
+```
+
+---
+
+### 7. Run Lead Scoring
 
 **POST** `/api/score/run`
 
@@ -140,7 +217,7 @@ Your API will run on `http://localhost:3010`.
 
 ---
 
-### 6. Get Score Results
+### 8. Get Score Results
 
 **POST** `/api/score/results`
 
@@ -262,6 +339,8 @@ POST    /api/offer
 DELETE  /api/offer/delete
 GET     /api/latest
 POST    /api/leads/upload
+GET     /api/leads/get
+DELETE  /api/leads/delete
 POST    /api/score/run
 POST    /api/score/results
 ```
