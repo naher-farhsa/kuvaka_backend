@@ -5,51 +5,61 @@ const ai = new GoogleGenAI({
 });
 
 // ----- Config -----
-const BATCH_SIZE = 5;              // process 5 leads per request
-const RETRY_LIMIT = 3;             // max retry attempts
-const RETRY_DELAY_MS = 15000;      // 15s between retries
+const BATCH_SIZE = 5; // process 5 leads per request
+const RETRY_LIMIT = 3; // max retry attempts
+const RETRY_DELAY_MS = 15000; // 15s between retries
 
-/**
- * Helper to wait before retry
- */
+// Max time per batch: up to 45s (3 attempts x 15s delay)
+
+
+/*** Helper to wait before retry */
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * AI Batch Scorer - processes multiple leads together in one Gemini call
- */
+//Total time per batch: up to 45s (3 attempts x 15s delay)
+
+/*** AI Batch Scorer - processes 5 leads together in one Gemini call */
 async function getScore(leads, offer) {
   const batchedResults = [];
 
-  // Split leads into chunks
+  //Split leads into batches of BATCH_SIZE
   for (let i = 0; i < leads.length; i += BATCH_SIZE) {
-    const batch = leads.slice(i, i + BATCH_SIZE);  //5 leads per batch
+    const batch = leads.slice(i, i + BATCH_SIZE);
+    if (!batch.length) continue; // skip empty batch
 
-    let attempt = 0;       // attempt counter
-    let success = false;  // track if batch was successful
+    let attempt = 0; // attempt counter
+    let success = false; //batch success flag
 
-    while (!success && attempt < RETRY_LIMIT) { 
+    while (!success && attempt < RETRY_LIMIT) {
       try {
-        console.log(`Processing batch ${i / BATCH_SIZE + 1}...`); 
+        console.log(`Processing batch ${i / BATCH_SIZE + 1}...`);
 
         const contents = [
           {
             text: `You are a B2B lead qualification AI.
-            Offer Details:
-            - Name: ${offer.name}
-            - Value Proposition: ${offer.value_props.join(", ")}
-            - Ideal Use Cases: ${offer.ideal_use_cases.join(", ")}
+Offer Details:
+- Name: ${offer.name}
+- Value Proposition: ${offer.value_props.join(", ")}
+- Ideal Use Cases: ${offer.ideal_use_cases.join(", ")}
 
-            Task: Classify each lead’s buying intent as High, Medium, or Low and explain briefly why.
+Lead Scoring Context (for reasoning only):
+- Role relevance: decision maker (High), influencer (Medium), else (Low) 
+- Industry match: exact ICP (High), adjacent (Medium), else (Low)
 
-            Respond strictly in JSON array format:
-            [ { "name": "<lead name>", "intent": "High|Medium|Low", "reason": "<why>" } ]
+Task: Classify each lead’s buying intent as High, Medium, or Low and explain in 1–2 lines reasoning.
 
-            Leads:
-            ${batch.map((lead, idx) => `${idx + 1}. ${lead.name}, ${lead.role}, ${lead.company}, ${lead.industry}`)
-              .join("\n")
-            }`,
+Respond strictly in JSON array format:
+[ { "name": "<lead name>", "ai_intent": "High|Medium|Low", "ai_reason": "<why>" } ]
+
+Leads:
+${batch
+  .map(
+    (lead, idx) =>
+      `${idx + 1}. ${lead.name}, ${lead.role}, ${lead.company}, ${lead.industry}`
+  )
+  .join("\n")}
+            `,
           },
         ];
 
@@ -57,34 +67,40 @@ async function getScore(leads, offer) {
           model: "gemini-2.0-flash",
           contents,
         });
- 
+        // extract text response
         let text = result?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
         text = text.replace(/```json|```/g, "").trim();
 
-        const parsed = JSON.parse(text);
+        // json parsing
+        let parsed = [];
+        try {
+          parsed = JSON.parse(text);
+        } catch (err) {
+          console.error("❌ JSON parse error for batch:", err.message);
+          parsed = [];
+        }
 
-        // Map results back to the right leads
+        // map results back to right leads
         for (const r of parsed) {
           const lead = batch.find((l) => l.name === r.name);
           if (!lead) continue;
 
-          let aiPoints = 10;
-          if (r.intent?.toLowerCase() === "high") aiPoints = 50;
-          else if (r.intent?.toLowerCase() === "medium") aiPoints = 30;
-
           batchedResults.push({
             ...lead,
-            aiPoints,
-            aiReason: r.reason || "No reasoning provided",
+            ai_intent: r.ai_intent?.trim() || "Low",
+            ai_reason: r.ai_reason?.trim() || "No reasoning provided",
           });
         }
 
-        success = true; // batch done
+        console.log("Batch results:", parsed); 
+
+        success = true;
       } catch (err) {
         attempt++;
         console.warn(
           `Rate limit or fetch error (attempt ${attempt}): ${err.message}`
         );
+
         if (attempt < RETRY_LIMIT) {
           console.log(`⏳ Retrying in ${RETRY_DELAY_MS / 1000}s...`);
           await delay(RETRY_DELAY_MS);
@@ -94,7 +110,9 @@ async function getScore(leads, offer) {
       }
     }
   }
-  return batchedResults;
+  console.log(batchedResults);
+  
+  return batchedResults;  // return all processed results
 }
 
-module.exports = {getScore};
+module.exports = { getScore };

@@ -7,6 +7,6 @@ const offerSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
 });
 
-const offerModel=mongoose.model('offers', offerSchema);
+const offerModel=mongoose.model('Offer', offerSchema);
 
 module.exports=offerModel;
